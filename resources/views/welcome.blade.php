@@ -1,4 +1,14 @@
-<!doctype html>
+@extends('layouts.app')
+
+@section('content')
+    <div class="center jumbotron">
+        <div class="text-center">
+            <h1>Welcome to the monolist</h1>
+        </div>
+    </div>
+@endsection
+
+<!--<!doctype html>
 <html lang="{{ app()->getLocale() }}">
     <head>
         <meta charset="utf-8">
@@ -8,10 +18,10 @@
         <title>Laravel</title>
 
         <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
+        <!--<link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
 
         <!-- Styles -->
-        <style>
+        <!--<style>
             html, body {
                 background-color: #fff;
                 color: #636b6f;
@@ -79,7 +89,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    Laravel
+                    monolist
                 </div>
 
                 <div class="links">
@@ -93,3 +103,4 @@
         </div>
     </body>
 </html>
+-->
