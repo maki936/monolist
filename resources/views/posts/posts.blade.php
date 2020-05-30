@@ -9,6 +9,13 @@
                 <div>
                     <p class="mb-0">{!! nl2br(e($post->post_details)) !!}</p>
                 </div>
+                <div>
+                    @if (Auth::id() == $post->user_id)
+                        {!! Form::open(['route' => ['posts.destroy', $post->id], 'method' => 'delete']) !!}
+                            {!! Form::submit('Delete', ['class' => 'btn btn-danger btn-sm']) !!}
+                        {!! Form::close() !!}
+                    @endif
+                </div>
             </div>
         </li>
     @endforeach

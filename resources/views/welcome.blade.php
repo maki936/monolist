@@ -14,6 +14,15 @@
                 </div>
             </aside>
             <div class="col-sm-8">
+                <!--ログインユーザ自身の情報が表示される User のページから Micropost が投稿できる-->
+                @if (Auth::id() == $user->id)
+                    {!! Form::open(['route' => 'posts.store']) !!}
+                        <div class="form-group">
+                            {!! Form::textarea('content', old('content'), ['class' => 'form-control', 'rows' => '2']) !!}
+                            {!! Form::submit('Post', ['class' => 'btn btn-secondary btn-block']) !!}
+                        </div>
+                    {!! Form::close() !!}
+                @endif
                 @if (count($posts) > 0)
                     @include('posts.posts', ['posts' => $posts])
                 @endif
