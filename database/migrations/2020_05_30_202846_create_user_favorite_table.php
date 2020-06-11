@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCommentsTable extends Migration
+class CreateUserFavoriteTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,17 +13,18 @@ class CreateCommentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('comments', function (Blueprint $table) {
+        Schema::create('user_favorite', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->unsigned()->index();
             $table->integer('post_id')->unsigned()->index();
-            $table->string('content');
             $table->timestamps();
-        
-        // 外部キー制約
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
             
+            // 外部キー設定
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
+
+            // user_idとfollow_idの組み合わせの重複を許さない
+            $table->unique(['user_id', 'post_id']);
         });
     }
 
@@ -34,6 +35,6 @@ class CreateCommentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('comments');
+        Schema::dropIfExists('user_favorite');
     }
 }

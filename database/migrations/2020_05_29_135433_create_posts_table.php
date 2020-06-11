@@ -17,8 +17,12 @@ class CreatePostsTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->unsigned()->index();
             $table->string('title');
-            $table->string('post_details');
+            $table->string('content');
+            $table->string('image');
             $table->timestamps();
+            
+            
+            //$table->index('user_id')
             
             // 外部キー制約
             $table->foreign('user_id')->references('id')->on('users');

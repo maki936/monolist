@@ -93,3 +93,167 @@
         </div>
     </body>
 </html>
+
+<!--show.blade.php-->
+@extends('layouts.app')
+
+@section('content')
+    <div class="row">
+        <aside class="col-sm-2">
+            @include('users.card', ['user' => $user])
+        </aside>
+        <div class="col-sm-8">
+            @include('users.navtabs', ['user' => $user])
+            @if (Auth::id() == $user->id)
+                {!! Form::open(['route' => 'posts.store']) !!}
+                {!! Form::close() !!}
+            @endif
+            
+           {!! link_to_route('posts.create', 'Item登録', [], ['class' => 'btn btn-secondary']) !!}
+        
+        </div>
+    </div>    
+            @if (count($posts) > 0)
+                @include('posts.posts', ['posts' => $posts])
+            @endif
+        
+    
+@endsection
+
+<!--posts.blade.php-->
+<ul class="list-unstyled"><!--home画面-->
+    @foreach ($posts as $post)
+        <li class="media mb-3">
+            <img class="mr-2 rounded" src="{{ Gravatar::src($post->user->email, 50) }}" alt="">
+            <div class="media-body">
+                <div>
+                    {!! link_to_route('users.show', $post->user->name, ['id' => $post->user->id]) !!} <span class="text-muted">posted at {{ $post->created_at }}</span>
+                </div>
+                <div>
+                    <p class="mb-0">{!! nl2br(e($post->title)) !!}</p>
+                </div>
+                <div class="row">
+                    @include('user_favorite.favorite_button', ['post' => $post])
+                    @if (Auth::id() == $micropost->user_id)
+                        {!! Form::open(['route' => ['microposts.destroy', $micropost->id], 'method' => 'delete', 'class' => 'form-inline']) !!}
+                            <!--<input class="btn btn-danger btn-sm" type="submit" value="Delete">-->
+                            {!! Form::submit('Delete', ['class' => 'btn btn-danger offset-md-4 btn-sm-4']) !!}
+                        {!! Form::close() !!}
+                    @endif
+                </div>
+            </div>
+        </li>
+    @endforeach
+</ul>
+{{ $posts->links('pagination::bootstrap-4') }}
+
+
+<!--posts.blade.php-->
+<!--home画面-->
+<div class="media mb-3">
+    @foreach ($posts as $post)
+        <div class="col-4 pb-4">
+            <a href="/profile/{{ $post->user->id}}">
+            <img src="/storage/{{ $post->image }}" class="w-100">
+            </a>
+        </div>
+    
+    <!--ここからpost内容-->
+    <div class="col-4">
+        <img class="mr-2 rounded" src="{{ Gravatar::src($post->user->email, 50) }}" alt="">
+        <div class="media-body">
+            <div>
+                <a href="/profile/{{ $post->user->id }}">
+                <span class="text-dark">{!! link_to_route('users.show', $post->user->name, ['id' => $post->user->id]) !!}</span> 
+                <span class="text-muted">posted at {{ $post->created_at }}</span>
+                </a>
+                <p class="mb-0">{!! nl2br(e($post->title)) !!}</p>
+                @if (Auth::id() == $post->user_id)
+                    {!! Form::open(['route' => ['posts.destroy', $post->id], 'method' => 'delete', 'class' => 'form-inline']) !!}
+                        <!--<input class="btn btn-danger btn-sm" type="submit" value="Delete">-->
+                        {!! Form::submit('Delete', ['class' => 'btn btn-danger offset-md-4 btn-sm-4']) !!}
+                    {!! Form::close() !!}
+                @endif
+            </div>
+        </div>
+    </div>
+    @endforeach
+</div>
+{{ $posts->links('pagination::bootstrap-4') }}
+
+<!--welcome.blade-->
+@extends('layouts.app')
+
+@section('content')
+    @if (Auth::check())
+        {{--<div class="row">
+            <aside class="col-sm-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ Auth::user()->name }}</h3>
+                    </div>
+                    <div class="card-body">
+                        <img class="rounded img-fluid" src="{{ Gravatar::src(Auth::user()->email, 500) }}" alt="">
+                    </div>
+                </div>
+            </aside>--}}
+            <div class="col-sm-8">
+                @if (Auth::id() == $user->id)
+                    {!! Form::open(['route' => 'posts.store']) !!}
+                        {{--<div class="form-group">
+                            {!! Form::textarea('content', old('content'), ['class' => 'form-control', 'rows' => '2']) !!}
+                            {!! Form::submit('Post', ['class' => 'btn btn-secondary btn-block']) !!}
+                        </div>--}}
+                    {!! Form::close() !!}
+                @endif
+                @if (count($posts) > 0)
+                    @include('posts.posts', ['posts' => $posts])
+                @endif
+            </div>
+        </div>
+    @else
+        <div class="center jumbotron">
+            <div class="text-center">
+                <h1>Welcome to the monolist</h1>
+                {!! link_to_route('signup.get', 'Sign up now!', [], ['class' => 'btn btn-lg btn-secondary']) !!}
+            </div>
+        </div>
+    @endif
+@endsection
+
+
+<!--PostsController-->
+public function store(Request $request)
+    {
+        $data = request()->validate([
+        //$this->validate($request, [ 昔のLaravelのバージョンでの書き方（同じ意味）
+            'another'=>'',
+            'title' => 'required|max:191',  
+            'content' => 'required|max:191',
+            'image' => 'required|image',
+        ]);
+        
+        /*                                
+        $imagePath = request('image')->store('uploads','public');
+                                                        //'s3'
+        $image = Image::make(public_path("storage/{$imagePath}"))->fit(1200,1200);
+        $image->save();
+        */
+        
+        $image = Image::make($requst->file('s3'))->fit(1200,1200);
+        //$file = $request->file('image');
+        $path = Storage::disk('s3')->putFile('/', $file->encode(), 'public');
+               //dump($path); 画面に$pathの中身を表示
+        $url = Storage::disk('s3')->url($path);
+               //dump($url); 画面に$urlの中身を表示
+               //exit();  動作確認なので、ここで処理を強制終了
+       
+        $request->user()->posts()->create([
+            'title' => $request->title,
+            'content' => $request->content,
+            'image' => $url,
+        ]);
+        
+        return redirect(route('users.show',['id' => \Auth::id()]));
+        
+    }

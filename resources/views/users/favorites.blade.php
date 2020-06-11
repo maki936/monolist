@@ -13,7 +13,8 @@
         </div>
     </div>
     
-    <div class="container pt-5">
-        @include('users.users', ['users' => $users])
+    <div>
+        @include('posts.posts', ['posts' => $post])
     </div>
+    
 @endsection

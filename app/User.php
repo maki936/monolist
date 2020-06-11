@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
+
 class User extends Authenticatable
 {
     use Notifiable;
@@ -29,7 +30,7 @@ class User extends Authenticatable
     
     public function posts()
     {
-        return $this->hasMany(Posts::class);
+        return $this->hasMany(Post::class)->orderBy('created_at','DESC');
     }
     
     
@@ -92,12 +93,12 @@ class User extends Authenticatable
     
     public function favorites()
     {
-        return $this->belongsToMany(Posts::class, 'user_favorite', 'user_id', 'post_id')->withTimestamps();
+        return $this->belongsToMany(Post::class, 'user_favorite', 'user_id', 'post_id')->withTimestamps();
     }
 
     public function favorite_users()
     {
-        return $this->belongsToMany(Posts::class, 'user_favorite', 'post_id', 'user_id')->withTimestamps();
+        return $this->belongsToMany(Post::class, 'user_favorite', 'post_id', 'user_id')->withTimestamps();
     }
     
     public function favorite($postId)
@@ -137,5 +138,10 @@ class User extends Authenticatable
     public function is_favorites($postId)
     {
         return $this->favorites()->where('post_id', $postId)->exists();
+    }
+    
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 }

@@ -11,7 +11,8 @@
 |
 */
 
-Route::get('/', 'PostsController@index');
+
+Route::get('/', 'PostsController@index')->name('posts.posts');
 
 // ユーザ登録
 Route::get('signup', 'Auth\RegisterController@showRegistrationForm')->name('signup.get');
@@ -31,7 +32,19 @@ Route::group(['middleware' => ['auth']], function () {
         Route::delete('unfollow', 'UserFollowController@destroy')->name('user.unfollow');
         Route::get('followings', 'UsersController@followings')->name('users.followings');
         Route::get('followers', 'UsersController@followers')->name('users.followers');
+        Route::get('favorites', 'UsersController@favorites')->name('users.favorites');
     });
     
-    Route::resource('posts', 'PostsController', ['only' => ['store', 'destroy']]);
+    Route::group(['prefix' => 'posts/{id}'], function () {
+        Route::post('favorite', 'FavoritesController@store')->name('favorites.favorite');
+        Route::delete('unfavorite', 'FavoritesController@destroy')->name('favorites.unfavorite');
+        Route::get('comments', 'PostsController@comments')->name('posts.comments'); //コメント入力・表示画面
+        Route::get('posts', 'PostsController@show')->name('posts.show'); //post詳細表示
+        
+    });
+    
+    Route::resource('comments', 'CommentsController', ['only' => ['store', 'destroy']]);
+    
+    Route::resource('posts', 'PostsController', ['only' => ['destroy','create','store']]);//item登録ページ
+    
 });
