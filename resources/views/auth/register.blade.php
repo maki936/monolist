@@ -28,6 +28,11 @@
                     {!! Form::label('password_confirmation', 'Confirmation') !!}
                     {!! Form::password('password_confirmation', ['class' => 'form-control']) !!}
                 </div>
+                
+                <div class="form-group">
+                    {!! Form::label('image', 'Post Image') !!}<br>
+                    {!! Form::file('image', null, ['class' => 'form-control-file']) !!}
+                </div>
 
                 {!! Form::submit('Sign up', ['class' => 'btn btn-secondary btn-block']) !!}
             {!! Form::close() !!}

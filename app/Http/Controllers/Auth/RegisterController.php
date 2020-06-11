@@ -51,6 +51,7 @@ class RegisterController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
+            'image' => 'required|string',
         ]);
     }
 
@@ -62,9 +63,22 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        $post = $request->user()->posts()->create([
+            'title' => $request->title,
+            'content' => $request->content,
+        ]);
+        
+        $name = 'post_images/' . $post->id . '.jpg';
+        $image = Image::make($request->file('image'))->fit(1200,1200)->encode();
+        $path = Storage::disk('s3')->put($name, (string) $image, 'public');
+        
+        $post->image = Storage::disk('s3')->url($name);
+        $post->save();
+        
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
+            'image' => $data['image'],
             'password' => bcrypt($data['password']),
         ]);
     }

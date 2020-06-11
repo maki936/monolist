@@ -76,17 +76,19 @@ class PostsController extends Controller
         $image = Image::make(public_path("storage/{$imagePath}"))->fit(1200,1200);
         $image->save();
         */
-        
-        $name = $request->file('image')->getClientOriginalName();
-        $image = Image::make($request->file('image'))->fit(1200,1200)->encode();
-        $path = Storage::disk('s3')->put($name, (string) $image, 'public');
-        $url = Storage::disk('s3')->url($name);
-               
-        $request->user()->posts()->create([
+        $post = $request->user()->posts()->create([
             'title' => $request->title,
             'content' => $request->content,
-            'image' => $url,
         ]);
+        
+        $name = 'post_images/' . $post->id . '.jpg';
+        $image = Image::make($request->file('image'))->fit(1200,1200)->encode();
+        $path = Storage::disk('s3')->put($name, (string) $image, 'public');
+        
+        $post->image = Storage::disk('s3')->url($name);
+        $post->save();
+               
+        
         
         return redirect(route('users.show',['id' => \Auth::id()]));
         
