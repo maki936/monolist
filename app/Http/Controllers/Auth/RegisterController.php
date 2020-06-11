@@ -6,6 +6,9 @@ use App\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Storage;
+use Illuminate\Http\UploadedFile;
+use Intervention\Image\Facades\Image;
 
 class RegisterController extends Controller
 {
@@ -39,47 +42,36 @@ class RegisterController extends Controller
         $this->middleware('guest');
     }
 
-    /**
-     * Get a validator for an incoming registration request.
-     *
-     * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
+    
+     
     protected function validator(array $data)
     {
         return Validator::make($data, [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
-            'image' => 'required|string',
+            'image' => 'required|image',
         ]);
     }
 
-    /**
-     * Create a new user instance after a valid registration.
-     *
-     * @param  array  $data
-     * @return \App\User
-     */
+    
     protected function create(array $data)
     {
-        $post = $request->user()->posts()->create([
-            'title' => $request->title,
-            'content' => $request->content,
-        ]);
-        
-        $name = 'post_images/' . $post->id . '.jpg';
-        $image = Image::make($request->file('image'))->fit(1200,1200)->encode();
-        $path = Storage::disk('s3')->put($name, (string) $image, 'public');
-        
-        $post->image = Storage::disk('s3')->url($name);
-        $post->save();
-        
-        return User::create([
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'image' => $data['image'],
+            'image' => null,
             'password' => bcrypt($data['password']),
         ]);
+            
+        $name = 'user_images/' . $user->id . '.jpg';
+        $image = Image::make($data['image'])->encode();
+        $path = Storage::disk('s3')->put($name, (string) $image, 'public');
+        
+        $user->image = Storage::disk('s3')->url($name);
+        $user->save();
+        
+        return $user;
+            
     }
 }
